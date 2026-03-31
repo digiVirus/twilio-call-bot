@@ -10,14 +10,33 @@ app.get("/call", async (req, res) => {
   );
 
   const to = req.query.to;
+  const name = req.query.name || "User";
+
+  const twimlUrl = `https://twilio-call-bot-production.up.railway.app/voice?name=${name}`;
 
   await client.calls.create({
-    url: "http://demo.twilio.com/docs/voice.xml",
+    url: twimlUrl,
     to: to,
     from: process.env.TWILIO_PHONE_NUMBER,
   });
 
   res.send("Call triggered");
+});
+
+// 🔥 Voice response (ladki voice)
+app.get("/voice", (req, res) => {
+  const name = req.query.name || "User";
+
+  const response = `
+    <Response>
+      <Say voice="alice" language="en-IN">
+        Hello ${name}, thank you for using our service.
+      </Say>
+    </Response>
+  `;
+
+  res.type("text/xml");
+  res.send(response);
 });
 
 app.listen(process.env.PORT || 3000);
