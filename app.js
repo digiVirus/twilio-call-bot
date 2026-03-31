@@ -3,37 +3,31 @@ const twilio = require("twilio");
 
 const app = express();
 
-// 🔥 call trigger
 app.get("/call", async (req, res) => {
-  try {
-    const client = twilio(
-      process.env.TWILIO_ACCOUNT_SID,
-      process.env.TWILIO_AUTH_TOKEN
-    );
+  const client = twilio(
+    process.env.TWILIO_ACCOUNT_SID,
+    process.env.TWILIO_AUTH_TOKEN
+  );
 
-    const to = req.query.to;
-    const name = req.query.name || "User";
+  const to = req.query.to;
+  const name = req.query.name || "User";
 
-    const twimlUrl = `https://twilio-call-bot-production.up.railway.app/voice?name=${encodeURIComponent(name)}`;
+  const twimlUrl = `https://twilio-call-bot-production.up.railway.app/voice?name=${encodeURIComponent(name)}`;
 
-    await client.calls.create({
-      url: twimlUrl,
-      to: `+${to}`, // 🔥 IMPORTANT FIX
-      from: process.env.TWILIO_PHONE_NUMBER,
-    });
+  await client.calls.create({
+    url: twimlUrl,
+    to: to,
+    from: process.env.TWILIO_PHONE_NUMBER,
+  });
 
-    res.send("Call triggered");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error: " + err.message);
-  }
+  res.send("Call triggered");
 });
 
-// 🔥 voice response
+// 🔥 Voice response (ladki voice)
 app.get("/voice", (req, res) => {
   const name = req.query.name || "User";
 
-  const twiml = `
+  const response = `
     <Response>
       <Say voice="alice" language="en-IN">
         Hello ${name}, thank you for using our service.
@@ -42,12 +36,7 @@ app.get("/voice", (req, res) => {
   `;
 
   res.type("text/xml");
-  res.send(twiml);
-});
-
-// 🔥 health check (important for Railway)
-app.get("/", (req, res) => {
-  res.send("Server is running");
+  res.send(response);
 });
 
 app.listen(process.env.PORT || 3000);
